@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import {
   StyleSheet,
   View,
-  Image,
   Dimensions,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import { TextInput, Button, Title, Text, useTheme } from "react-native-paper";
-import { AuthNavigationProp } from "../../navigation/types";
-import { LinearGradient } from "expo-linear-gradient";
+import { LinearGradient } from "expo-linear-gradient"; // Import correct
+import useAuthStore from "../../store/authStore"; // Correct store import
+import { AuthNavigationProp } from "../../navigation/types"; // Correct navigation type
 
 type LoginScreenProps = {
   navigation: AuthNavigationProp;
@@ -21,10 +21,21 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const theme = useTheme();
 
-  const handleLogin = () => {
-    console.log("Login attempt:", email);
+  const theme = useTheme();
+  const { login, isLoading, error } = useAuthStore(); // Utilisation du store Zustand
+
+  const handleLogin = async () => {
+    try {
+      console.log("Tentative de connexion avec:", { email, password });
+      await login(email, password);
+      console.log("Connexion réussie");
+      console.log();
+      // Redirection vers la page principale après la connexion réussie
+      // navigation.navigate("MainTabs");
+    } catch (err) {
+      console.log("Erreur de connexion:", err);
+    }
   };
 
   return (
@@ -34,10 +45,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         style={styles.keyboardView}
       >
         <View style={styles.logoContainer}>
-          {/* <Image
-            source={require("../../assets/logo.png")} // Add your logo
-            style={styles.logo}
-          /> */}
           <Title style={styles.appName}>HabitPro</Title>
           <Text style={styles.tagline}>
             Développez vos habitudes professionnelles
@@ -73,11 +80,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             }
           />
 
+          {error && <Text style={styles.errorText}>{error}</Text>}
+
           <Button
             mode="contained"
             onPress={handleLogin}
             style={styles.loginButton}
             contentStyle={styles.buttonContent}
+            loading={isLoading}
+            disabled={isLoading}
           >
             Se connecter
           </Button>
@@ -113,11 +124,6 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: "center",
     marginBottom: 40,
-  },
-  logo: {
-    width: 100,
-    height: 100,
-    marginBottom: 10,
   },
   appName: {
     fontSize: 32,
@@ -174,5 +180,10 @@ const styles = StyleSheet.create({
   orText: {
     marginHorizontal: 10,
     color: "#757575",
+  },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginBottom: 16,
   },
 });

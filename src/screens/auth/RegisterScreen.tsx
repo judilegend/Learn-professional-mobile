@@ -9,6 +9,7 @@ import {
 import { TextInput, Button, Title, Text, useTheme } from "react-native-paper";
 import { AuthNavigationProp } from "../../navigation/types";
 import { LinearGradient } from "expo-linear-gradient";
+import useAuthStore from "../../store/authStore";
 
 type RegisterScreenProps = {
   navigation: AuthNavigationProp;
@@ -24,9 +25,15 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const theme = useTheme();
+  //definir  le store register
+  const { register, isLoading, error } = useAuthStore();
 
-  const handleRegister = () => {
-    console.log("Register attempt:", email);
+  const handleRegister = async () => {
+    if (password !== confirmPassword) {
+      // Handle password mismatch
+      return;
+    }
+    await register(email, password);
   };
 
   return (
